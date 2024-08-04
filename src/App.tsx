@@ -48,7 +48,6 @@ function newStar() {
     isSStar: false
   }
 }
-var tickIters = 0;
 
 const server_url = "https://unusual-vickie-prj-trex-e25f682f.koyeb.app"
 const quotes = ["hi", "second quote", "third quote"]
@@ -132,7 +131,7 @@ function App() {
     return () => {
       socket.off('stars', stars_func)
     }
-  }, [stars])
+  }, [stars, parseServerStars])
 
   useEffect(() => {
     let star_func = (e: string) => {
@@ -143,7 +142,7 @@ function App() {
     return () => {
       socket.off('star', star_func)
     }
-  }, [stars, parseServerStars])
+  }, [stars])
 
   useEffect(() => {
     let edge_func = (e: any) => {
