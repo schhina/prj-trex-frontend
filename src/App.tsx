@@ -121,6 +121,9 @@ function App() {
       // some additional context, for example the XMLHttpRequest object
       console.log(err.context);
     });
+    socket.on("error", (err) => {
+      console.log(err)
+    });
 
     // socket.emit("lol", "lol")
     return () => {
@@ -176,6 +179,7 @@ function App() {
           headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
         }).then(async (res) => {
           if (res.status == 200) {
+            setEdges([])
             // let data = await res.json()
             // setStars(parseServerStars(data.data))
           }
