@@ -121,9 +121,9 @@ function App() {
       // some additional context, for example the XMLHttpRequest object
       console.log(err.context);
     });
-    socket.on("error", (err) => {
-      console.log(err)
-    });
+    // socket.on("error", (err) => {
+    //   console.log(err)
+    // }));
 
     // socket.emit("lol", "lol")
     return () => {
