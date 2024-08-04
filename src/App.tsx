@@ -53,7 +53,7 @@ function newStar() {
 }
 var tickIters = 0;
 
-const server_url = "unusual-vickie-prj-trex-e25f682f.koyeb.app"
+const server_url = "http://unusual-vickie-prj-trex-e25f682f.koyeb.app"
 const quotes = ["hi", "second quote", "third quote"]
 
 function getWindowDimensions() {
@@ -108,7 +108,21 @@ function App() {
       setShootingStars([...shootingStars, parseSStar(e)])
     }
     socket.on("sstar", sstar_func)
-    socket.emit("lol", "lol")
+
+    socket.on("connect_error", (err: any) => {
+      // the reason of the error, for example "xhr poll error"
+      console.log(err.message);
+      
+      console.log(err)
+
+      // some additional description, for example the status code of the initial HTTP response
+      console.log(err.description);
+    
+      // some additional context, for example the XMLHttpRequest object
+      console.log(err.context);
+    });
+
+    // socket.emit("lol", "lol")
     return () => {
       socket.off('sstar', sstar_func)
     }
@@ -119,7 +133,7 @@ function App() {
       setStars(parseServerStars(e))
     }
     socket.on("stars", stars_func);
-    socket.emit("lol", "lol")
+    // socket.emit("lol", "lol")
     return () => {
       socket.off('stars', stars_func)
     }
@@ -133,7 +147,7 @@ function App() {
       setStars([...stars, parseStar(star_str)])
     }
     socket.on("star", star_func)
-    socket.emit("lol", "lol")
+    // socket.emit("lol", "lol")
     return () => {
       socket.off('star', star_func)
     }
@@ -145,7 +159,7 @@ function App() {
     }
     
     socket.on("edge", edge_func)
-    socket.emit("lol", "lol")
+    // socket.emit("lol", "lol")
     return () => {
       socket.off('edge', edge_func)
 
