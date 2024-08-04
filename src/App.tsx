@@ -53,7 +53,7 @@ function newStar() {
 }
 var tickIters = 0;
 
-const server_url = "http://127.0.0.1:5000"
+const server_url = "unusual-vickie-prj-trex-e25f682f.koyeb.app/"
 const quotes = ["hi", "second quote", "third quote"]
 
 function getWindowDimensions() {
