@@ -1,9 +1,6 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import { useState, useRef, useEffect } from "react";
-import { Grid, Box, Typography, TextField, Button, CircularProgress, Stack, IconButton } from '@mui/material';
-// import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import { Grid, Box, Typography, Button } from '@mui/material';
 import {socket} from './socket';
 
 type shootingStar = {
@@ -82,10 +79,7 @@ function useWindowDimensions() {
 
 function App() {
   const shootingStarTick : number = 10;
-  const generateShootingStarDelay : number = 500;
-  const numberOfStars : number = 150;
   const sStarMaxVelocity = 50;
-  const distanceThreshold = 10**2;
 
   const dimensions = useWindowDimensions();
   const pageHeight = dimensions.height
@@ -93,13 +87,11 @@ function App() {
 
   const [ stars, setStars ] = useState<star[]>([])
   const [ shootingStars, setShootingStars ] = useState<shootingStar[]>([getNewSStar()])
-  const [ shootingStarTimes, setShootingStarTimes ] = useState<number[]>([])
   const [ selectedStar, setSelectedStar ] = useState(-1);
   const [ edges, setEdges ] = useState<edge[]>([]);
   const [ isDrawMode, setIsDrawMode ] = useState(false);
   const [ isDrag, setIsDrag ] = useState(false);
   const [ quoteNum, setQuoteNum ] = useState(0);
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
   const drawToggleButtonRef = useRef<HTMLInputElement>(null)
 
@@ -144,17 +136,14 @@ function App() {
 
   useEffect(() => {
     let star_func = (e: string) => {
-      console.log("getting new star")
       let star_str: string = e.substring(1, e.length - 1)
-      console.log(parseStar(star_str))
       setStars([...stars, parseStar(star_str)])
     }
     socket.on("star", star_func)
-    // socket.emit("lol", "lol")
     return () => {
       socket.off('star', star_func)
     }
-  }, [stars])
+  }, [stars, parseServerStars])
 
   useEffect(() => {
     let edge_func = (e: any) => {
@@ -178,19 +167,19 @@ function App() {
           method: "GET",
           headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
         }).then(async (res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             setEdges([])
             // let data = await res.json()
             // setStars(parseServerStars(data.data))
           }
         })
       }
-      if (e.key == 's') {
+      if (e.key === 's') {
         fetch(server_url + "/get/sstar", {
           method: "GET",
           headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'}
         }).then(async (res) => {
-          if (res.status == 200) {
+          if (res.status === 200) {
             // let data = await res.json()
             // let sstar = parseSStar(data.data)
             // setShootingStars([...shootingStars, sstar])
@@ -213,7 +202,7 @@ function App() {
     return () => {
       clearInterval(starInterval);
     }
-  }, [shootingStars]);
+  }, [shootingStars, updateShootingStars]);
 
   function parseEdge(raw_edge: string) {
     let edge = newEdge();
@@ -231,7 +220,7 @@ function App() {
     let vals = [];
     let prev = -1;
     for (let i = 0; i < sstar.length + 1; i++) {
-      if (sstar[i] == ',' || i === sstar.length) {
+      if (sstar[i] ===',' || i === sstar.length) {
         vals.push(parseFloat(sstar.substring(prev, i)));
         prev = i + 1;
       }
@@ -248,7 +237,7 @@ function App() {
   function parseStar(star: string) {
     let res = newStar();
     for (let i = 0; i < star.length; i++){
-      if (star[i] == ',') {
+      if (star[i] === ',') {
         res.x = parseFloat(star.substring(0, i));
         res.y = parseFloat(star.substring(i + 1));
       }
@@ -262,7 +251,7 @@ function App() {
     for (let i = 0; i < stars.length; i++ ){ 
       if (stars[i] === "(") {
         let j = i;
-        while (j < stars.length && stars[j] != ")") j++;
+        while (j < stars.length && stars[j] !== ")") j++;
         let star = stars.substring(i + 1, j);
         star_arr.push(parseStar(star))
         i = j;
@@ -306,7 +295,7 @@ function App() {
       onClick={() => {
         if (!isSStar) {
           console.log("clicked on star")
-          if (selectedStar == -1) {
+          if (selectedStar === -1) {
             setSelectedStar(starInd);
           }
           else {
@@ -435,13 +424,13 @@ function App() {
       
       <Grid container minHeight="100vh" direction="row" alignContent="start">
         <Grid item xs={1}>
-          <Button sx={{color: "white"}} onClick={() => {setQuoteNum((quoteNum == 0 ? quotes.length - 1 : quoteNum - 1))}}>{"<-"}</Button>
+          <Button sx={{color: "white"}} onClick={() => {setQuoteNum((quoteNum === 0 ? quotes.length - 1 : quoteNum - 1))}}>{"<-"}</Button>
         </Grid>
         <Grid item xs={10} justifyContent="center" justifyItems="center">
           <Typography color="white" textAlign="center" onClick={() => {console.log(edges)}}>{quotes[quoteNum]}</Typography>
         </Grid>
         <Grid item xs={1}>
-          <Button sx={{color: "white"}} onClick={() => {setQuoteNum((quoteNum == quotes.length - 1 ? 0 : quoteNum + 1))}}>{"->"}</Button>
+          <Button sx={{color: "white"}} onClick={() => {setQuoteNum((quoteNum === quotes.length - 1 ? 0 : quoteNum + 1))}}>{"->"}</Button>
         </Grid>
       </Grid>
    </Box>
