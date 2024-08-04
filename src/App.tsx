@@ -123,7 +123,7 @@ function App() {
     });
     // socket.on("error", (err) => {
     //   console.log(err)
-    // }));
+    // })); - 'npm ci --cache .npm --prefer-offline'
 
     // socket.emit("lol", "lol")
     return () => {
