@@ -49,7 +49,7 @@ function newStar() {
   }
 }
 
-const server_url = "https://unusual-vickie-prj-trex-e25f682f.koyeb.app"
+const server_url = "https://unusual-vickie-prj-trex-e25f682f.koyeb.app" // https://unusual-vickie-prj-trex-e25f682f.koyeb.app
 const quotes = ["hi", "second quote", "third quote"]
 
 function getWindowDimensions() {
@@ -91,8 +91,23 @@ function App() {
   const [ isDrawMode, setIsDrawMode ] = useState(false);
   const [ isDrag, setIsDrag ] = useState(false);
   const [ quoteNum, setQuoteNum ] = useState(0);
+  const [ isErase, setIsErase ] = useState(false);
 
   const drawToggleButtonRef = useRef<HTMLInputElement>(null)
+
+  async function loadStars() {
+    let stars = await fetch(server_url + "/get/stars", {
+      method: "GET",
+    }).then(async (res) => {
+      let data = await res.json()
+      return parseServerStars(data.data)
+    })
+    return setStars(stars);
+  }
+
+  useEffect(() => {
+    loadStars()
+  }, [])
 
   useEffect(() => {
     let sstar_func = (e: any) => {
@@ -125,13 +140,14 @@ function App() {
   useEffect(() => {
     let stars_func = (e: any) => {
       setStars(parseServerStars(e))
+      setEdges([])
     }
     socket.on("stars", stars_func);
     // socket.emit("lol", "lol")
     return () => {
       socket.off('stars', stars_func)
     }
-  }, [stars, parseServerStars])
+  }, [stars, parseServerStars, edges])
 
   useEffect(() => {
     let star_func = (e: string) => {
@@ -290,9 +306,24 @@ function App() {
   }
 
   function renderStar(x : number, y : number, isSStar : boolean, starInd: number) {
-    return <Box sx={{position: "absolute", marginLeft: (x + "vw"), marginTop: (y + "vh"), color: "white", fontSize: (isSStar ? 10 : 5)}}
+    return <div className="star-class" style={{position: "absolute", marginLeft: (x + "vw"), marginTop: (y + "vh"), color: "white", fontSize: (isSStar ? 10 : 5)}}
+      onMouseEnter={(e) => {
+        if (isDrag && isErase && isDrawMode) {
+          fetch(server_url + "/erase-star", {
+            method: "POST",
+            body: JSON.stringify({
+              index: starInd
+            })
+          })
+        }
+        console.log("hover start")
+      }}
+      onMouseLeave={(e) => {
+        console.log("hover end")
+      }}
       onClick={() => {
-        if (!isSStar) {
+        if (isSStar) return;
+        if (!isDrawMode){
           console.log("clicked on star")
           if (selectedStar === -1) {
             setSelectedStar(starInd);
@@ -314,7 +345,7 @@ function App() {
         }
       }}>
       <p>*</p>
-    </Box>;
+    </div>;
   }
 
   function renderStars() {
@@ -358,7 +389,7 @@ function App() {
   }
 
   function drag(e: any) {
-    if (isDrag && isDrawMode) {
+    if (isDrag && isDrawMode && !isErase) {
       console.log("sending")
       let star = newStar();
       star.x = e.pageX/pageWidth*100;
@@ -408,10 +439,19 @@ function App() {
         onMouseLeave={endDrag}
         >
       
-      <Grid container direction="column" ref={drawToggleButtonRef}>
-        <Grid item xs={1}>
+      <Grid container direction="row" ref={drawToggleButtonRef}>
+        <Grid item xs={3}>
           <Button sx={{color: "white"}} onClick={() => {setIsDrawMode(!isDrawMode)}}>{(isDrawMode ? "Turn draw mode off" : "Turn draw mode on")}</Button>
         </Grid>
+        {
+          (isDrawMode) ?
+          <Grid item xs={3}>
+            <Button sx={{color: "white"}} onClick={() => {setIsErase(!isErase)}}>{(isErase ? "Turn erase off" : "Turn erase on")}</Button>
+          </Grid>
+          : 
+          <></>
+        }
+        
       </Grid>
 
       <Box 
